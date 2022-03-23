@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
+import java.time.OffsetDateTime
 
 @SpringBootTest
 internal class DynamoDBMapperTest {
@@ -56,12 +57,43 @@ internal class DynamoDBMapperTest {
 
 
         // when
-        createTableRequest.globalSecondaryIndexes.forEach { it
-            .withProvisionedThroughput(ProvisionedThroughput(1L, 1L))
-            .withProjection(Projection().withProjectionType(ProjectionType.ALL))
+        createTableRequest.globalSecondaryIndexes.forEach {
+            it.withProvisionedThroughput(ProvisionedThroughput(1L, 1L))
+                .withProjection(Projection().withProjectionType(ProjectionType.ALL))
         }
 
         // then
         assertThat(TableUtils.createTableIfNotExists(amazonDynamoDB, createTableRequest)).isTrue
+    }
+
+    @Test
+    fun testSaveItemAfterCreatedTable() {
+        // given
+        val comment2 = Comment2()
+        comment2.mentionId = 1
+        comment2.name = "name"
+        comment2.content = "example content"
+        comment2.createdAt = OffsetDateTime.now()
+        comment2.deleted = false
+
+        // when
+        dynamoDBMapper.save(comment2)
+
+        // then
+    }
+
+    @Test
+    @Disabled
+    fun testGetItem() {
+        // given
+        val loadedItem = dynamoDBMapper.load(Comment2::class.java, "acbf0644-8d34-40f3-8dcb-37ddeba2b59a")
+
+        assertThat(loadedItem.content).isEqualTo("example content")
+        assertThat(loadedItem.createdAt).isNotNull
+        assertThat(loadedItem.deleted).isFalse
+
+        // when
+
+        // then
     }
 }
