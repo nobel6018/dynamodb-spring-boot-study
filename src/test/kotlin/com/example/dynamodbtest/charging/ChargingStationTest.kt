@@ -3,18 +3,18 @@ package com.example.dynamodbtest.charging
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.regions.Region
-import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.model.*
 import com.amazonaws.services.dynamodbv2.util.TableUtils
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.context.SpringBootTest
+import java.time.OffsetDateTime
+import java.util.*
 
 @SpringBootTest
 internal class ChargingStationTest {
@@ -34,7 +34,7 @@ internal class ChargingStationTest {
             BasicAWSCredentials(accessKey, secretKey)
         val awsStaticCredentialsProvider = AWSStaticCredentialsProvider(basicAWSCredentials)
         val endpointConfiguration =
-            EndpointConfiguration("https://dynamodb.ap-northeast-2.amazonaws.com", Regions.AP_NORTHEAST_2.name)
+            EndpointConfiguration("https://dynamodb.ap-northeast-2.amazonaws.com", "ap-northeast-2")
 
         amazonDynamoDB = AmazonDynamoDBClientBuilder.standard()
             .withCredentials(awsStaticCredentialsProvider)
@@ -68,6 +68,25 @@ internal class ChargingStationTest {
         val isTableCreated = TableUtils.createTableIfNotExists(amazonDynamoDB, createTableRequest)
 
         assertThat(isTableCreated).isEqualTo(true)
+    }
+
+    @Test
+    @Disabled
+    fun testPutItemAfterCreatedTable() {
+        val item = HashMap<String, AttributeValue>()
+        item["id"] = AttributeValue().withS(UUID.randomUUID().toString())
+        item["mentionId"] = AttributeValue().withN("1")
+        item["content"] = AttributeValue().withS("comment content")
+        item["deleted"] = AttributeValue().withBOOL(false)
+        item["createdAt"] = AttributeValue().withS(OffsetDateTime.now().toString())
+
+        val putItemRequest = PutItemRequest()
+            .withTableName("Comment")
+            .withItem(item)
+
+        val putItemResult = amazonDynamoDB.putItem(putItemRequest)
+
+        assertThat(putItemResult.sdkHttpMetadata.httpStatusCode).isEqualTo(200)
     }
 }
 
