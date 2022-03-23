@@ -96,4 +96,20 @@ internal class DynamoDBMapperTest {
 
         // then
     }
+
+    @Test
+    fun testUpdateItem() {
+        // given
+        val comment2 = dynamoDBMapper.load(Comment2::class.java, "acbf0644-8d34-40f3-8dcb-37ddeba2b59a")
+
+        comment2.name = "another name"
+        comment2.content = "another content"
+
+        // when
+        dynamoDBMapper.save(comment2)
+
+        // then
+        val updatedComment = dynamoDBMapper.load(Comment2::class.java, "acbf0644-8d34-40f3-8dcb-37ddeba2b59a")
+        assertThat(updatedComment).hasFieldOrPropertyWithValue("content", "another content")
+    }
 }
