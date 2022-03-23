@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.OffsetDateTime
 import java.util.*
+import kotlin.collections.HashMap
 
 @SpringBootTest
 internal class ChargingStationTest {
@@ -88,5 +89,29 @@ internal class ChargingStationTest {
 
         assertThat(putItemResult.sdkHttpMetadata.httpStatusCode).isEqualTo(200)
     }
+
+    @Test
+    @Disabled
+    fun testGetItemAfterCreatedTable() {
+        // given
+        val key = HashMap<String, AttributeValue>()
+        key["id"] = AttributeValue().withS("235fe7ad-db1c-4268-bcc7-f61f8185c194")
+
+        val item = HashMap<String, AttributeValue>()
+        item["mentionId"] = AttributeValue().withN("1")
+        item["content"] = AttributeValue().withS("comment content")
+
+        // when
+        val getItemRequest = GetItemRequest()
+            .withTableName("Comment")
+            .withKey(key)
+
+        val getItemResult = amazonDynamoDB.getItem(getItemRequest)
+
+        // then
+        assertThat(getItemResult.item["mentionId"]).isEqualTo(item["mentionId"])
+        assertThat(getItemResult.item["content"]).isEqualTo(item["content"])
+    }
+
 }
 
