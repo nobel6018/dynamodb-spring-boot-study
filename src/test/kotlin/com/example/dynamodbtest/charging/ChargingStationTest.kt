@@ -113,5 +113,23 @@ internal class ChargingStationTest {
         assertThat(getItemResult.item["content"]).isEqualTo(item["content"])
     }
 
+    @Test
+    @Disabled
+    fun testDeleteItem() {
+        // given
+        val key = HashMap<String, AttributeValue>()
+        key["id"] = AttributeValue().withS("235fe7ad-db1c-4268-bcc7-f61f8185c194")
+
+        // when
+        val deleteItemRequest = DeleteItemRequest()
+            .withTableName("Comment")
+            .withKey(key)
+
+        val deleteItemResult = amazonDynamoDB.deleteItem(deleteItemRequest)
+
+        // then
+        assertThat(deleteItemResult.sdkHttpMetadata.httpStatusCode).isEqualTo(200)
+    }
+
 }
 
